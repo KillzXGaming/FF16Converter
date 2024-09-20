@@ -198,6 +198,8 @@ namespace FinalFantasy16
                     if (!FormatList.Any(x => x.Value.ToString() == encoder.ToString()))
                         throw new Exception($"Texture does not support format {encoder.ToString()}");
 
+                    this.Format = (TextureFormat)FormatList.FirstOrDefault(X => X.Value.ToString() == encoder.ToString()).Key;
+
                     SetImageData(TextureDataUtil.GetAlignedData(this, dds.ImageData));
                 }
                 else
@@ -456,9 +458,10 @@ namespace FinalFantasy16
                     writer.Write(chunk.MiscFlags);
                 }
 
+                writer.AlignBytes(16);
                 for (int i = 0; i < compressed.Count; i++)
                 {
-                    writer.AlignBytes(16);
+                    writer.AlignBytes(8);
                     writer.WriteUint32Offset(chunk_start + (i * 16));
                     writer.Write(compressed[i]);
                 }
