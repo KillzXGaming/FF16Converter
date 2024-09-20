@@ -1,9 +1,16 @@
 # FF16 Converter
-A tool to convert multiple FF16 formats. Currently supports
+A simple CLI tool to convert multiple FF16 formats. Currently supports
 - .tex (texture file)
 - .pkg (subtitles)
 
 Plan to support font files (.fnt) from .ttf in another update along with multiple images from .tex.
+
+## Usage
+- Drag/drop .tex or .pkg to create .png/.dds or .xml.
+- Drag/drop the file back to replace .tex or .pkg.
+- Drag/drop to ConvertDDS.bat or use -dds in command line to create .dds instead of png.
+
+Texture support only supports replacing. Creating from scatch will be added in soon.
 
 ## Credits
 - https://github.com/Nenkai/FF16Tools by Nenkai for docs on .tex, gdeflate, and format enums.
