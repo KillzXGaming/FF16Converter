@@ -163,6 +163,9 @@ namespace FF16Converter
                 int alignedWidth = (int)tex.GetAlignedWidth(i);
                 int blockHeight = (mipHeight + 3) / 4;
 
+                if (i == tex.MipCount - 1 && i > 0)
+                    alignedWidth = Math.Max(mipWidth, 4);
+
                 int alignedRowSize = (alignedWidth / 4) * blockSize;
                 int totalAlignedSize = alignedRowSize * blockHeight;
                 byte[] alignedData = new byte[totalAlignedSize];

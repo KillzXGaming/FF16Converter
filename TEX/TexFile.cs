@@ -82,10 +82,11 @@ namespace FinalFantasy16
                 //Mip data stored in second chunk
                 if (mipmap_list.Count > 1)
                 {
-                    var mipData = ByteUtil.CombineByteArray(mipmap_list.Skip(1).Take(mipmap_list.Count - 1).ToArray());
+                    var mipData = ByteUtil.CombineByteArray(mipmap_list.Skip(1).ToArray());
                     Chunks.Add(new Chunk()
                     {
                         DecompressedBuffer = mipData,
+                       // MiscFlags = 1,
                         ChunkType = 1, //todo what does this flag do
                     });
                 }
@@ -207,7 +208,10 @@ namespace FinalFantasy16
                     var image = Image.Load<Rgba32>(path);
                     this.Width = (ushort)image.Width;
                     this.Height = (ushort)image.Height;
-                    this.MipCount = (ushort)CalculateMipCount();
+                    var mipCount = (ushort)CalculateMipCount();
+                    //Use original mip count unless computed is too low
+                    if (this.MipCount < mipCount)
+                        this.MipCount = mipCount;
 
                     var mipmaps = ImageSharpTextureHelper.GenerateMipmaps(image, this.MipCount);
 
@@ -235,7 +239,7 @@ namespace FinalFantasy16
 
                         image?.Dispose();
                     }
-                    SetImageData(encoded_mips);
+                    SetImageData(TextureDataUtil.GetAlignedData(this, ByteUtil.CombineByteArray(encoded_mips.ToArray())));
                 }
             }
 
