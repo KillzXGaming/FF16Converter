@@ -10,7 +10,7 @@ Plan to support font files (.fnt) from .ttf in another update along with multipl
 - Drag/drop the file back to replace .tex or .pkg.
 - Drag/drop to ConvertDDS.bat or use -dds in command line to create .dds instead of png.
 
-Texture support only supports replacing. Creating from scatch will be added in soon.
+Texture support only supports replacing and only with one texture in .tex atm. Creating from scatch will be added in soon.
 
 ## Credits
 - https://github.com/Nenkai/FF16Tools by Nenkai for docs on .tex, gdeflate, and format enums.
