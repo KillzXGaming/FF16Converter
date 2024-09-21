@@ -131,7 +131,7 @@ namespace FinalFantasy16
                     Chunks.Add(new Chunk()
                     {
                         DecompressedBuffer = mipData,
-                       // MiscFlags = 1,
+                        ChunkIndex = 1,
                         ChunkType = 1, //todo what does this flag do
                     });
                 }
@@ -340,6 +340,12 @@ namespace FinalFantasy16
             {
                 get => (uint)BitUtils.GetBits((int)Flags, 0, 2);
                 set => Flags = (uint)BitUtils.SetBits((int)Flags, (int)value, 0, 2);
+            }
+
+            public uint ChunkIndex
+            {
+                get => (uint)BitUtils.GetBits((int)MiscFlags, 0, 7);
+                set => MiscFlags = (uint)BitUtils.SetBits((int)MiscFlags, (int)value, 0, 7);
             }
 
             public bool IsCompressed = true;
