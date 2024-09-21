@@ -305,6 +305,11 @@ namespace FinalFantasy16
                 if (this.SignedDistanceField) 
                     paddedWidth = (int)Align(width, 256);
 
+                //pain
+                if (this.Format == TextureFormat.BC4_UNORM &&
+                    (this.MipCount == 9 || this.MipCount == 7))
+                    paddedWidth = (int)Align(width, 128);
+
                 return (uint)paddedWidth;
             }
 
