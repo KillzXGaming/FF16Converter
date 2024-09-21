@@ -432,8 +432,12 @@ namespace FinalFantasy16
                 writer.WriteStruct(TexHeader);
 
                 int chunkIndex = 0;
+
+                long textureHeaderPos = writer.Position;
                 for (int i = 0; i < Textures.Count; i++)
                 {
+                    Textures[i].ChunkSize = (uint)chunks.Sum(x => x.CompressedSize);  
+
                     writer.Write(Textures[i].Flags);
                     writer.Write((uint)Textures[i].Format);
                     writer.Write(Textures[i].MipCount);
@@ -466,6 +470,9 @@ namespace FinalFantasy16
                 for (int i = 0; i < compressed.Count; i++)
                 {
                     writer.AlignBytes(8);
+                    //texture data offset
+                    writer.WriteUint32Offset(textureHeaderPos + (i * 32) + 16);
+                    //chunk data offset
                     writer.WriteUint32Offset(chunk_start + (i * 16));
                     writer.Write(compressed[i]);
                 }
