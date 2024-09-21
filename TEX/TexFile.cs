@@ -65,6 +65,51 @@ namespace FinalFantasy16
 
             public List<Chunk> Chunks = new List<Chunk>();
 
+            public byte Dimension
+            {
+                get => (byte)BitUtils.GetBits((int)Flags, 0, 2);
+                set => Flags = (uint)BitUtils.SetBits((int)Flags, (int)value, 0, 2);
+            }
+
+            public bool SignedDistanceField
+            {
+                get => BitUtils.GetBit((int)Flags, 2);
+                set => Flags = (uint)BitUtils.SetBit((int)Flags, value, 2);
+            }
+
+            public bool NoChunks
+            {
+                get => BitUtils.GetBit((int)Flags, 3);
+                set => Flags = (uint)BitUtils.SetBit((int)Flags, value, 3);
+            }
+
+            public byte UnknownBits1
+            {
+                get => (byte)BitUtils.GetBits((int)Flags, 4, 2);
+                set => Flags = (uint)BitUtils.SetBits((int)Flags, (int)value, 4, 2);
+            }
+
+            public byte UnknownBits2
+            {
+                get => (byte)BitUtils.GetBits((int)Flags, 6, 2);
+                set => Flags = (uint)BitUtils.SetBits((int)Flags, (int)value, 6, 2);
+            }
+
+            public uint UnknownBits24
+            {
+                get => (uint)BitUtils.GetBits((int)Flags, 8, 24);
+                set => Flags = (uint)BitUtils.SetBits((int)Flags, (int)value, 8, 24);
+            }
+
+            public Texture()
+            {
+                this.Dimension = 1;
+                this.UnknownBits2 = 2;
+                this.UnknownBits24 = 0xFFFFFF;
+                this.Depth = 1;
+                this.Color = 0xC7AFA6FF;
+            }
+
             public byte[] GetImageData()
             {
                 byte[] decomp = ByteUtil.CombineByteArray(Chunks.Select(x => x.DecompressedBuffer).ToArray());
@@ -249,18 +294,6 @@ namespace FinalFantasy16
                 return Math.Max((uint)Math.Floor(Math.Log(Math.Max(Width, Height), 2)), 1);
             }
 
-            public byte Dimension
-            {
-                get => (byte)BitUtils.GetBits((int)Flags, 0, 2);
-                set => Flags = (uint)BitUtils.SetBits((int)Flags, (int)value, 0, 2);
-            }
-
-            public bool SignedDistanceField
-            {
-                get => BitUtils.GetBit((int)Flags, 2);
-                set => Flags = (uint)BitUtils.SetBit((int)Flags, value, 2);
-            }
-
             public uint GetAlignedWidth(int mip_level = 0)
             {
                 var width = (uint)TextureDataUtil.CalculateMipDimension(this.Width, mip_level);
@@ -422,8 +455,7 @@ namespace FinalFantasy16
 
         public void Save(Stream stream)
         {
-            var chunks = Textures.SelectMany(x => x.Chunks).ToList();
-            TexHeader.ChunkCount = (ushort)chunks.Count;
+            TexHeader.ChunkCount = (ushort)Textures.Sum(x => x.Chunks.Count);
             TexHeader.TextureCount =  (byte)Textures.Count;
             TexHeader.Magic = "TEX ";
 
@@ -432,15 +464,25 @@ namespace FinalFantasy16
                 writer.WriteStruct(TexHeader);
 
                 List<byte[]> compressed = new List<byte[]>();
-                for (int i = 0; i < chunks.Count; i++)
-                    compressed.Add(chunks[i].Compress(chunks[i].DecompressedBuffer));
+
+                foreach (var chunk in Textures.SelectMany(x => x.Chunks))
+                    compressed.Add(chunk.Compress(chunk.DecompressedBuffer));
 
                 int chunkIndex = 0;
 
                 long textureHeaderPos = writer.Position;
                 for (int i = 0; i < Textures.Count; i++)
                 {
-                    Textures[i].ChunkSize = (uint)chunks.Sum(x => x.CompressedSize);  
+                    uint totalSize = 0;
+                    foreach (var chunk in Textures[i].Chunks)
+                    {
+                        //alignment
+                        totalSize += (uint)(-totalSize % 8 + 8) % 8;
+                        //compression size
+                        totalSize += chunk.CompressedSize;
+                    }
+
+                    Textures[i].ChunkSize = totalSize;  
 
                     writer.Write(Textures[i].Flags);
                     writer.Write((uint)Textures[i].Format);
@@ -448,7 +490,7 @@ namespace FinalFantasy16
                     writer.Write(Textures[i].Width);
                     writer.Write(Textures[i].Height);
                     writer.Write(Textures[i].Depth);
-                    writer.Write(Textures[i].ChunkOffset);
+                    writer.Write(0); //offset set later
                     writer.Write(Textures[i].ChunkSize);
                     writer.Write(Textures[i].Color);
                     writer.Write((ushort)chunkIndex);
@@ -458,7 +500,7 @@ namespace FinalFantasy16
                 }
 
                 var chunk_start = writer.Position;
-                foreach (var chunk in chunks)
+                foreach (var chunk in Textures.SelectMany(x => x.Chunks))
                 {
                     writer.Write(0); //offset set later
                     writer.Write(chunk.Flags);
@@ -467,11 +509,13 @@ namespace FinalFantasy16
                 }
 
                 writer.AlignBytes(16);
+
+                //texture data offset
+                writer.WriteUint32Offset(textureHeaderPos + (0 * 32) + 16);
+
                 for (int i = 0; i < compressed.Count; i++)
                 {
                     writer.AlignBytes(8);
-                    //texture data offset
-                    writer.WriteUint32Offset(textureHeaderPos + (i * 32) + 16);
                     //chunk data offset
                     writer.WriteUint32Offset(chunk_start + (i * 16));
                     writer.Write(compressed[i]);
