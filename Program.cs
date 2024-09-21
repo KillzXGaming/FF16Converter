@@ -9,7 +9,6 @@ namespace FF16Converter
         {
             // args = new string[] { "t_c1002h0101_occl.tex", "-dds" };
             //  args = new string[] { "t_c1002h0101_occl.tex", "-png" };
-           //   args = new string[] { "t_c1002h0101_occl.tex.dds" };
 
             Console.WriteLine($"Tool by KillzXGaming");
             Console.WriteLine($"https://github.com/KillzXGaming/FF16Converter");
@@ -37,22 +36,32 @@ namespace FF16Converter
                     TexFile texFile = new TexFile(File.OpenRead(arg));
                     foreach (var tex in texFile.Textures)
                         tex.Export(arg + ext);
-                }
-                else if (arg.EndsWith(".tex.png"))
-                {
-                    Console.WriteLine($"converting .png to .tex");
 
-                    TexFile texFile = new TexFile(File.OpenRead(arg.Replace(".png", "")));
-                    texFile.Textures[0].Replace(arg);
-                    texFile.Save(arg.Replace(".png", ""));
+                    //texFile.Save("testRB.tex");
                 }
-                else if (arg.EndsWith(".tex.dds"))
+                else if (arg.EndsWith(".png") ||
+                         arg.EndsWith(".dds") ||
+                         arg.EndsWith(".tga") ||
+                         arg.EndsWith(".tiff") ||
+                         arg.EndsWith(".bmp") ||
+                         arg.EndsWith(".jpg"))
                 {
-                    Console.WriteLine($"converting .dds to .tex");
+                    string ext = Path.GetExtension(arg);
 
-                    TexFile texFile = new TexFile(File.OpenRead(arg.Replace(".dds", "")));
-                    texFile.Textures[0].Replace(arg);
-                    texFile.Save(arg.Replace(".dds", ""));
+                    Console.WriteLine($"converting {ext} to .tex");
+
+                    if (File.Exists(arg.Replace(ext, ""))) //replace existing .tex
+                    {
+                        TexFile texFile = new TexFile(File.OpenRead(arg.Replace(ext, "")));
+                        texFile.Textures[0].Replace(arg);
+                        texFile.Save(arg.Replace(ext, ""));
+                    }
+                    else //create from scatch
+                    {
+                        TexFile texFile = new TexFile();
+                        texFile.Textures[0].Replace(arg);
+                        texFile.Save(arg.Replace(ext, ".tex"));
+                    }
                 }
                 else if (arg.EndsWith(".pzd"))
                 {

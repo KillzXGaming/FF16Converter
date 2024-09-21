@@ -30,9 +30,9 @@ namespace FinalFantasy16
         public class Header
         {
             public Magic Magic = "TEX ";
-            public byte Version = 1;
-            public byte Flags;
-            public byte Unknown;
+            public byte Version = 4;
+            public byte Flags = 1;
+            public byte Unknown = 16;
             public byte Padding;
 
             public byte TextureCount;
@@ -40,7 +40,7 @@ namespace FinalFantasy16
             public ushort ChunkCount;
             public uint Unknown2;
             public uint Unknown3;
-            public uint UnknownFlags;
+            public uint UnknownFlags = 0x13;
 
             public uint Padding3;
             public uint Padding4;
@@ -107,7 +107,7 @@ namespace FinalFantasy16
                 this.UnknownBits2 = 2;
                 this.UnknownBits24 = 0xFFFFFF;
                 this.Depth = 1;
-                this.Color = 0xC7AFA6FF;
+                this.Color = 0xFFA6AFC7;
             }
 
             public byte[] GetImageData()
@@ -393,6 +393,14 @@ namespace FinalFantasy16
         public List<Texture> Textures = new List<Texture>();
 
         public Header TexHeader = new Header();
+
+        public TexFile()
+        {
+            Textures.Add(new Texture()
+            {
+                Format = TextureFormat.BC7_UNORM_SRGB,
+            });
+        }
 
         public TexFile(Stream stream)
         {
