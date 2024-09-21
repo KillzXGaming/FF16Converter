@@ -431,6 +431,10 @@ namespace FinalFantasy16
             { 
                 writer.WriteStruct(TexHeader);
 
+                List<byte[]> compressed = new List<byte[]>();
+                for (int i = 0; i < chunks.Count; i++)
+                    compressed.Add(chunks[i].Compress(chunks[i].DecompressedBuffer));
+
                 int chunkIndex = 0;
 
                 long textureHeaderPos = writer.Position;
@@ -452,10 +456,6 @@ namespace FinalFantasy16
 
                     chunkIndex += Textures[i].Chunks.Count;
                 }
-
-                List<byte[]> compressed = new List<byte[]>();
-                for (int i = 0; i < chunks.Count; i++)
-                    compressed.Add(chunks[i].Compress(chunks[i].DecompressedBuffer));
 
                 var chunk_start = writer.Position;
                 foreach (var chunk in chunks)
