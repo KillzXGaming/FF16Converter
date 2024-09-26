@@ -7,9 +7,6 @@ namespace FF16Converter
     {
         public static void Main(string[] args)
         {
-            // args = new string[] { "t_c1002h0101_occl.tex", "-dds" };
-            //  args = new string[] { "t_c1002h0101_occl.tex", "-png" };
-
             Console.WriteLine($"Tool by KillzXGaming");
             Console.WriteLine($"https://github.com/KillzXGaming/FF16Converter");
             Console.WriteLine($"");
@@ -30,7 +27,6 @@ namespace FF16Converter
                 if (arg.EndsWith(".tex"))
                 {
                     string ext = args.Contains("-dds") ? ".dds" : ".png";
-
                     Console.WriteLine($"converting .tex to {ext}");
 
                     TexFile texFile = new TexFile(File.OpenRead(arg));

@@ -113,6 +113,7 @@ namespace FinalFantasy16
             public byte[] GetImageData()
             {
                 byte[] decomp = ByteUtil.CombineByteArray(Chunks.Select(x => x.DecompressedBuffer).ToArray());
+                File.WriteAllBytes("raw.bin", decomp);
                 return TextureDataUtil.CalculateSurfacePadding(this, decomp);
             }
 
@@ -122,7 +123,7 @@ namespace FinalFantasy16
                 Chunks.Add(new Chunk()
                 {
                     DecompressedBuffer = mipmap_list[0], //base level image
-                    ChunkType = 0, //todo what does this flag do
+                    ChunkType = mipmap_list.Count == 1 ? 1u : 0u, //todo what does this flag do
                 });
                 //Mip data stored in second chunk
                 if (mipmap_list.Count > 1)
@@ -255,7 +256,7 @@ namespace FinalFantasy16
                     this.Height = (ushort)image.Height;
                     var mipCount = (ushort)CalculateMipCount();
                     //Use original mip count unless computed is too low
-                    if (this.MipCount < mipCount)
+                    if (this.MipCount < mipCount && MipCount != 1)
                         this.MipCount = mipCount;
 
                     var mipmaps = ImageSharpTextureHelper.GenerateMipmaps(image, this.MipCount);
@@ -264,22 +265,12 @@ namespace FinalFantasy16
                     List<byte[]> encoded_mips = new List<byte[]>();
                     for (int i = 0; i < MipCount; i++)
                     {
-                        var w = this.GetAlignedWidth(i);
-                        var h = this.GetAlignedHeight(i);
                         var imageMipmap = mipmaps[i];
                         var rgba = imageMipmap.GetSourceInBytes();
 
-                        //Create an image with the padded sizes if necessary
-                        if (w != this.Height || h != this.Width)
-                        {
-                            using var paddedImage = new Image<Rgba32>((int)w, (int)h, new Rgba32());
-                            paddedImage.Mutate(x => x.DrawImage(imageMipmap, new Point(0, 0), 1f));
-                            rgba = paddedImage.GetSourceInBytes();
-                        }
-
                         //rgba convert
                         var formatEncoder = TexFile.FormatList[(int)this.Format];
-                        var encoded = formatEncoder.Encode(rgba, w, h);
+                        var encoded = formatEncoder.Encode(rgba, Width, Height);
                         encoded_mips.Add(encoded);
 
                         image?.Dispose();

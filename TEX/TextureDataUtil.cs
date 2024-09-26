@@ -210,7 +210,7 @@ namespace FF16Converter
 
                 for (int y = 0; y < mipHeight; y++)
                 {
-                    int originalRowSize = mipWidth * (int)bitsPerPixel;
+                    int originalRowSize = mipWidth * (int)bytesPerPixel;
                     int rowStart = y * originalRowSize;
                     byte[] originalRowData = data.Skip(mipOffset + rowStart).Take(originalRowSize).ToArray();
 
