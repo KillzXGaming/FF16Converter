@@ -113,7 +113,6 @@ namespace FinalFantasy16
             public byte[] GetImageData()
             {
                 byte[] decomp = ByteUtil.CombineByteArray(Chunks.Select(x => x.DecompressedBuffer).ToArray());
-                File.WriteAllBytes("raw.bin", decomp);
                 return TextureDataUtil.CalculateSurfacePadding(this, decomp);
             }
 
