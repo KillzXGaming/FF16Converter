@@ -266,10 +266,12 @@ namespace FinalFantasy16
                     {
                         var imageMipmap = mipmaps[i];
                         var rgba = imageMipmap.GetSourceInBytes();
+                        var mipWidth  = (uint)TextureDataUtil.CalculateMipDimension(this.Width, i);
+                        var mipHeight = (uint)TextureDataUtil.CalculateMipDimension(this.Height, i);
 
                         //rgba convert
                         var formatEncoder = TexFile.FormatList[(int)this.Format];
-                        var encoded = formatEncoder.Encode(rgba, Width, Height);
+                        var encoded = formatEncoder.Encode(rgba, mipWidth, mipHeight);
                         encoded_mips.Add(encoded);
 
                         image?.Dispose();
