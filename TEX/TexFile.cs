@@ -291,9 +291,6 @@ namespace FinalFantasy16
                 var width = (uint)TextureDataUtil.CalculateMipDimension(this.Width, mip_level);
 
                 int paddedWidth = (int)Align(width, 64);
-                if (mip_level >= 1 && this.Width == 512)
-                    paddedWidth = (int)Align(width, 128);
-
                 if (this.SignedDistanceField) 
                     paddedWidth = (int)Align(width, 256);
 
