@@ -137,20 +137,6 @@ namespace FinalFantasy16
                 }
             }
 
-            public Image<Rgba32> ToImage()
-            {
-                var data = GetImageData();
-                var w = this.GetAlignedWidth();
-                var h = this.GetAlignedHeight();
-                //rgba convert
-                var formatDecoder = TexFile.FormatList[(int)this.Format];
-                var rgba = formatDecoder.Decode(data, w, h);
-
-                var image = Image.LoadPixelData<Rgba32>(rgba, (int)w, (int)h);
-                image.Mutate(x => x.Crop(this.Width, this.Height));
-                return image;
-            }
-
             public void Export(string path)
             {
                 if (path.EndsWith(".dds"))
@@ -284,36 +270,6 @@ namespace FinalFantasy16
 
             private uint CalculateMipCount() {
                 return Math.Max((uint)Math.Floor(Math.Log(Math.Max(Width, Height), 2)), 1);
-            }
-
-            public uint GetAlignedWidth(int mip_level = 0)
-            {
-                var width = (uint)TextureDataUtil.CalculateMipDimension(this.Width, mip_level);
-
-                int paddedWidth = (int)Align(width, 64);
-                if (this.SignedDistanceField) 
-                    paddedWidth = (int)Align(width, 256);
-
-                //pain
-                if (this.Format == TextureFormat.BC4_UNORM &&
-                    (this.MipCount == 9 || this.MipCount == 7))
-                    paddedWidth = (int)Align(width, 128);
-
-                return (uint)paddedWidth;
-            }
-
-            public uint GetAlignedHeight(int mip_level = 0)
-            {
-                var height = (uint)TextureDataUtil.CalculateMipDimension(this.Height, mip_level);
-
-                if (this.Format.ToString().StartsWith("BC")) //Align by block size
-                    return (uint)(height > 4 ? (uint)Align(height, 4) : height);
-                else
-                    return height;
-            }
-
-            private static uint Align(uint value, uint alignment) {
-                return (value + (alignment - 1)) & ~(alignment - 1);
             }
         }
 
